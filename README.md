@@ -1,6 +1,14 @@
-# gphotos-googleapis
+# get-me-a-googleapi-refresh-token
 
-- Get a token and list all photos
+The purpose of this package is to encapsulating authentication to Google APIs with OAuth2.
+
+In particular we want to provision/verify refresh tokens *locally for a developer*, to test interacting with such a service.
+
+**This is meant to get local credententials, for local development (i.e. the OAuth callback is on <http://127.0.0.1>).*
+
+This library depends on the Google maintained [google-auth-library](https://github.com/googleapis/google-auth-library-nodejs#oauth2) package
+
+The basics of Google's OAuth2 implementation is explained on [Google Authorization and Authentication documentation](https://developers.google.com/identity/protocols/OpenIDConnect).
 
 ## TODO
 
@@ -13,19 +21,24 @@
 - renovate
 - `google-auth-library` is included in `googleapis`, switch to that
 
-## OAuth2 Flow
+## Parts
 
-This is the OAuth2 flow as descibed in <https://github.com/googleapis/google-auth-library-nodejs#oauth2> and <https://github.com/googlesamples/google-photos/tree/master/REST/PhotoFrame>.
+Some parts are harder to automate, so this description is still necessary
 
-This is meant to get local credententials, for local development (i.e. the OAuth callback is on <http://127.0.0.1>).
+### Preparing - Creating Project and credentials
 
-- Prepare som credentials in the [Google Developpers Console]
-  - Select a (possibly new) project
-  - Enable the API's you want to use in the APIs & Services Section/Library
-  - Create OAuth client ID from the dropdown and give it a  name: `OAuth CLient` for example
-    - Application type: Web Application, and give it a name
-    - Set the authorized JavaScript origin to <http://127.0.0.1>
-    - Set authorized redirect URL to <http://127.0.0.1:8080/auth/google/callback>
+Before your application can use Google's OAuth 2.0 authentication system for user login, you must set up a project in the [Google API Console](https://console.developers.google.com/) to obtain OAuth 2.0 credentials and set an authentication callback (redirectURI).
+
+- Goto [Google API Console](https://console.developers.google.com/)
+- Create (or select an existing) Project
+- Enable the API's you want to use in the [APIs & Services Section/Library](https://console.developers.google.com/apis/library)
+- Go to [APIs and Services / Credentials tab](https://console.developers.google.com/apis/credentials).
+- Create credentials > OAuth client ID
+- Set the authorized JavaScript origin to <http://127.0.0.1> and the authorized redirect URL to <http://127.0.0.1:8080/auth/google/callback>. (The callback path can be any path you choose you choose)
+- You can then copy the three pieces of information we need (or download the json credentials from the console)
+  - Client ID
+  - Client Secret
+  - Redirect URI's
 
 ## References
 
