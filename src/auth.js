@@ -4,8 +4,6 @@ const url = require('url')
 const open = require('open')
 const enableDestroy = require('server-destroy')
 
-const { validateForLocalUse } = require('./setupCommand')
-
 module.exports = {
   usingRefreshToken,
   validateScope,
@@ -49,9 +47,7 @@ async function usingRefreshToken (keys, refreshToken) {
   return oAuth2Client
 }
 
-async function validateScope (oAuth2Client, desiredScopes) {
-  const { scopes: actualScopes } = await oAuth2Client.getTokenInfo(oAuth2Client.credentials.access_token)
-
+async function validateScope (actualScopes, desiredScopes) {
   // console.debug('Verifying requested scopes', { desiredScopes, actualScopes })
   let allOk = true
   for (const scope of desiredScopes) {
@@ -74,44 +70,61 @@ async function validateScope (oAuth2Client, desiredScopes) {
 }
 
 // This triggers a new web flow, opening op a browser window
+// assumes the parameters were validated
 // returns {  id, name, refreshToken, scopes }
-async function makeRefreshTokenWithWebFlow (keys, desiredScopes) {
-  const { redirectUri, callbackPath, localPort, error } = validateForLocalUse(keys)
-  if (error) {
-    throw error
-  }
+async function makeRefreshTokenWithWebFlow ({
+  clientId, clientSecret, redirectUri,
+  scopes: desiredScopes, // renamed to avoid conflict with obtained scopes.
+  callbackPath, localPort,
+  verbose = false
+}) {
   const oAuth2Client = new OAuth2Client({
-    clientId: keys.web.client_id,
-    clientSecret: keys.web.client_secret,
-    redirectUri: redirectUri,
+    clientId,
+    clientSecret,
+    redirectUri,
     forceRefreshOnFailure: true
   })
 
   const code = await getAuthorizationCode(oAuth2Client, callbackPath, localPort, desiredScopes)
-  // console.debug(`Got the authorization code: ${code}`)
+  if (verbose) {
+    console.debug(`Got the authorization code: ${code}`)
+  }
   const { tokens } = await oAuth2Client.getToken(code)
-  // console.debug('Got new tokens', { tokens })
+  if (verbose) {
+    console.debug('Got new tokens', { tokens })
+  }
   oAuth2Client.setCredentials(tokens)
 
   // rename refresh_token: refreshToken, so we can return it in camelCase
   const { refresh_token: refreshToken } = tokens
 
   // I can get the id (renamed from sub) and scopes from the tokenInfo
+  // But only if we have scope profile,openid, or "https://www.googleapis.com/auth/userinfo.profile"
+  // if we don't have this scope id will be null
   const { sub: id, scopes } = await oAuth2Client.getTokenInfo(
     oAuth2Client.credentials.access_token
   )
 
   // Make sure we got all the scopes we wanted
-  const scopesOk = await validateScope(oAuth2Client, desiredScopes)
+  const scopesOk = await validateScope(scopes, desiredScopes)
   if (!scopesOk) {
-    throw new Error('Missing authorization scopes')
+    // Let's not make this fatal, validateScope prints warnings
+    // throw new Error('Missing authorization scopes')
   }
 
-  // The name (and also sub/id which is tkenInfo) can be obtained from OAuth2 userinfo.
-  // this requires scope: 'https://www.googleapis.com/auth/userinfo.profile'
-  // We can also fetch the similar from 'https://people.googleapis.com/v1/people/me?personFields=names';
-  const { data: { name } } = await oAuth2Client.request({ url: 'https://www.googleapis.com/oauth2/v3/userinfo' })
+  // The name (and also sub/id which is in above getTokenInfo) can be obtained from OAuth2 userinfo.
+  // if we have request scope: "https://www.googleapis.com/auth/userinfo.profile"
+  let name
+  try {
+    const { data } = await oAuth2Client.request({ url: 'https://www.googleapis.com/oauth2/v3/userinfo' })
+    name = data.name
+  } catch (err) {
+    // insufficient scope to fetch name
+  }
 
+  // if (!id || !name) {
+  //   console.warn('You might want to add `https://www.googleapis.com/auth/userinfo.profile` to your requested scopes to get `id` and `name` fields associated with this token')
+  // }
   return { id, name, refreshToken, scopes }
 }
 

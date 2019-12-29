@@ -58,7 +58,7 @@ async function validateArgs (argv) {
 //   "web": {
 //     "clientId": "9383849493-lmnbxcbksjhedcksbdkjchb.apps.googleusercontent.com",
 //     "clientSecret": "XYSYDHEKJHD",
-//     "redirectURI": "http://127.0.0.1:8080/auth/google/callback"
+//     "redirectUri": "http://127.0.0.1:8080/auth/google/callback"
 //     "scopes":["atLeastOneScope"]
 //   }
 // }
@@ -66,7 +66,7 @@ async function validateArgs (argv) {
 // return {
 //   callbackPath:'/some/callback/path',
 //   localPort:8080
-//   redirectURI:http://127.0.0.1:8080/auth/google/callback
+//   redirectUri:http://127.0.0.1:8080/auth/google/callback
 //   scopes:["atLeastOneScope"]
 // }
 //   or an error
@@ -74,8 +74,8 @@ async function validateArgs (argv) {
 //   error: "If there was an error"
 // }
 function validateForLocalUse (opts) {
-  if (!opts || !opts.clientId || !opts.clientSecret || !opts.redirectURI || !opts.scopes) {
-    return { error: 'Missing at least one required parameter : `{clientId,clientSecret,redirectURI,scopes:[]}`' }
+  if (!opts || !opts.clientId || !opts.clientSecret || !opts.redirectUri || !opts.scopes) {
+    return { error: 'Missing at least one required parameter : `{clientId,clientSecret,redirectUri,scopes:[]}`' }
   }
   if (!Array.isArray(opts.scopes)) {
     return { error: '`scopes` is not an Array' }
@@ -83,8 +83,8 @@ function validateForLocalUse (opts) {
   if (!opts.scopes.length > 0) {
     return { error: 'Missing `scopes[]` entries' }
   }
-  // clientId,clientSecret,redirectURI should all be strings
-  for (const prop of ['clientId', 'clientSecret', 'redirectURI']) {
+  // clientId,clientSecret,redirectUri should all be strings
+  for (const prop of ['clientId', 'clientSecret', 'redirectUri']) {
     if (typeof opts[prop] !== 'string') {
       return { error: `\`${prop}\` should be a string` }
     }
@@ -95,24 +95,27 @@ function validateForLocalUse (opts) {
       return { error: '`scopes[]` should all be strings' }
     }
   }
-  // validate content: proper redirectURI path and port
-  if (!opts.redirectURI.startsWith('http://127.0.0.1')) {
-    return { error: '`redirectURI` should start with http://127.0.0.1' }
+  // validate content: proper redirectUri path and port
+  if (!opts.redirectUri.startsWith('http://127.0.0.1')) {
+    return { error: '`redirectUri` should start with http://127.0.0.1' }
   }
   try {
-    const redirectUri = opts.redirectURI
+    const { clientId, clientSecret, redirectUri, scopes } = opts
     const u = new url.URL(redirectUri)
     const callbackPath = u.pathname
     const localPort = Number(u.port)
     if (localPort === 0) {
-      throw new Error('http port should be explicit for redirectURI')
+      throw new Error('http port should be explicit for redirectUri')
     }
     return {
+      clientId,
+      clientSecret,
       redirectUri,
+      scopes,
       callbackPath,
       localPort
     }
   } catch (err) {
-    return { error: '`redirectURI` ' + `error:${err}` }
+    return { error: '`redirectUri` ' + `error:${err}` }
   }
 }

@@ -12,14 +12,13 @@ The basics of Google's OAuth2 implementation is explained on [Google Authorizati
 
 ## TODO
 
-- Document provisioning App Credentials
-- Remove a level from `oauth2.keys.json`
-- Implement refreshTokensDB.json
-  - persist refresh token by account
-- yargs: verify,renew,noauth,user
-- extract Auth/TokenManagement into npm
+- Implement refreshTokensDB.json (-db)
+  - persist refresh token by account/id
 - renovate
-- `google-auth-library` is included in `googleapis`, switch to that
+
+## Scopes
+
+To identify a requested token with an `sub/id` field, we need to add `https://www.googleapis.com/auth/userinfo.profile` to our requested scopes. This is equivalent to the `profile` scope, and also provides us with a `name,given_name,family_name,picture` fields. You can also use `openid` as a requested scope, which will give ths `sub,picture` identification fields, but no name.
 
 ## Usage
 
@@ -33,7 +32,7 @@ Some parts are harder to automate, so this description is still necessary
 
 ### Preparing - Creating Project and credentials
 
-Before your application can use Google's OAuth 2.0 authentication system for user login, you must set up a project in the [Google API Console](https://console.developers.google.com/) to obtain OAuth 2.0 credentials and set an authentication callback (redirectURI).
+Before your application can use Google's OAuth 2.0 authentication system for user login, you must set up a project in the [Google API Console](https://console.developers.google.com/) to obtain OAuth 2.0 credentials and set an authentication callback (redirectUri).
 
 - Goto [Google API Console](https://console.developers.google.com/)
 - Create (or select an existing) Project
