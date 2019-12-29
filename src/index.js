@@ -4,19 +4,12 @@ const yargs = require('yargs')
 // const { usingRefreshToken, validateScope, makeRefreshTokenWithWebFlow } = require('./auth')
 const setupCommand = require('./setupCommand')
 const generateCommand = require('./generateCommand')
+const verifyCommand = require('./verifyCommand')
 
 yargs // eslint-disable-line
   .command(setupCommand) // default command - validates configuration
   .command(generateCommand)
-  .command('validate <token>', 'validate a refresh token', (yargs) => {
-    yargs
-      .positional('refresh-token', {
-        describe: 'a refresh token to validate'
-      })
-  }, (argv) => {
-    console.info(`generate ${42}`)
-    if (argv.verbose) console.info(`generate verbosely ${42}`)
-  })
+  .command(verifyCommand)
   .options({
     verbose: {
       alias: 'v',
@@ -29,6 +22,7 @@ yargs // eslint-disable-line
         "client_id": "MY_CLIENT_ID',
         "client_secret":"MY_CLIENT_SECRET',
         "redirect_uris":["http://127.0.0.1:8080/somepath"]
+        "scopes":["https://www.googleapis.com/auth/userinfo.profile",..]
       }`,
       default: 'oauth2.keys.json'
     }

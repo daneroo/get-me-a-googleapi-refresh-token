@@ -15,34 +15,49 @@ module.exports = {
 
 // might want to verfy requested scopes
 // returns an authenticated OAuth2Client
-async function usingRefreshToken (keys, refreshToken) {
-  if (!keys || !keys.web || !keys.web.client_id || !keys.web.client_secret) {
-    throw new Error('Missing at least one required parameter : `{web:{client_id,client_secret}}`')
-  }
-
+async function usingRefreshToken ({
+  clientId, clientSecret,
+  refreshToken,
+  scopes: desiredScopes, // renamed to avoid conflict with obtained scopes.
+  verbose = false
+}) {
   const oAuth2Client = new OAuth2Client({
-    clientId: keys.web.client_id,
-    clientSecret: keys.web.client_secret,
+    clientId,
+    clientSecret,
     // To test eager refresh add: eagerRefreshThresholdMillis: 3600000 - 10000,
     forceRefreshOnFailure: true
   })
 
   // listener to show token events.
-  oAuth2Client.on('tokens', (t) => {
-    // console.log('** usingRefreshToken ** tokens', t)
-    const exp = new Date(t.expiry_date)
-    const secondsFromNow = ((+exp - new Date()) / 1000).toFixed(1)
-    console.debug(`** usingRefreshToken access expires in ${secondsFromNow}s (${exp})`)
-  })
+  if (verbose) {
+    oAuth2Client.on('tokens', (t) => {
+      // console.log('** usingRefreshToken ** tokens', t)
+      const exp = new Date(t.expiry_date)
+      const secondsFromNow = ((+exp - new Date()) / 1000).toFixed(1)
+      console.debug(`** usingRefreshToken refreshed. Access expires in ${secondsFromNow}s (${exp})`)
+    })
+  }
 
   const { tokens } = await oAuth2Client.refreshToken(refreshToken)
   // The returned tokens object does not include the passed in refreshToken,
   // We add it back so that the client is able to refresh the access tokens on failure or eager refresh
   tokens.refresh_token = refreshToken
+  if (verbose) {
+    console.log('refreshed tokens', tokens)
+  }
   oAuth2Client.setCredentials(tokens)
 
-  // const tokenInfo = await oAuth2Client.getTokenInfo(oAuth2Client.credentials.access_token)
-  // console.debug({ tokenInfo })
+  const tokenInfo = await oAuth2Client.getTokenInfo(oAuth2Client.credentials.access_token)
+  if (verbose) {
+    console.log({ tokenInfo })
+  }
+
+  // Make sure we got all the scopes we wanted
+  const scopesOk = await validateScope(tokenInfo.scopes, desiredScopes)
+  if (!scopesOk) {
+    // Let's not make this fatal, validateScope prints warnings
+    // throw new Error('Missing authorization scopes')
+  }
 
   return oAuth2Client
 }
