@@ -12,6 +12,10 @@ The basics of Google's OAuth2 implementation is explained on [Google Authorizati
 
 ## TODO
 
+- Rename public methods
+- Test
+- Publish, use in gphotos-googleapis
+- Specific validators or url
 - Implement refreshTokensDB.json (-db)
   - persist refresh token by account/id
 - renovate

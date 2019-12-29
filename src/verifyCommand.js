@@ -36,6 +36,7 @@ async function handler (argv) {
   const oAuth2Client = await usingRefreshToken(validatedOptions, argv.token)
   console.info('Client acquired.')
 
+  // specific validators: make a bunch of these: gphotos,drive
   {
     console.log('Calling OAuth userInfo - to validate token')
     const url = 'https://www.googleapis.com/oauth2/v3/userinfo'
