@@ -1,34 +1,13 @@
 #!/usr/bin/env node
 
 const yargs = require('yargs')
-const { usingRefreshToken, validateScope, makeRefreshTokenWithWebFlow } = require('./auth')
-const fsPromises = require('fs').promises
-
-// Download your OAuth2 configuration from the Google Console/APIs ad Services/Credentials
-const refreshTokenDBFile = './refreshTokenDB.json'
-const keys = require('../oauth2.keys.json')
-const scope = [
-  'https://www.googleapis.com/auth/userinfo.profile', // so I can get name
-  'https://www.googleapis.com/auth/photoslibrary.readonly'
-]
+// const { usingRefreshToken, validateScope, makeRefreshTokenWithWebFlow } = require('./auth')
+const setupCommand = require('./setupCommand')
+const generateCommand = require('./generateCommand')
 
 yargs // eslint-disable-line
-  .command(['setup', '$0'], 'validate setup', async (yargs) => {
-    // default command
-  }, async (argv) => {
-    const { error } = await validateSetup(argv)
-    if (error) {
-      console.error(`Error: ${error}\n\n`)
-      yargs.showHelp()
-    }
-  })
-  .command('generate',
-    'generate a refresh token (this will start a server for the callback, and open a web page to initiate the OAuth2 web flow.)',
-    (yargs) => {}, // builder
-    async (argv) => { // handler
-      const setup = await validateSetup(argv)
-      console.info(`generate: ${JSON.stringify(setup)}`)
-    })
+  .command(setupCommand) // default command - validates configuration
+  .command(generateCommand)
   .command('validate <token>', 'validate a refresh token', (yargs) => {
     yargs
       .positional('refresh-token', {
@@ -59,53 +38,6 @@ yargs // eslint-disable-line
   .help()
   .argv
 
-// validateSetup returns either of:
-// - {clientId,clientSecret,redirecURI}
-// - {error:message}
-async function validateSetup (argv) {
-  console.log('Validating setup...')
-  try {
-    await fsPromises.access(argv.keys)
-    console.log(`- Keys file exists ${argv.keys}`)
-  } catch (err) {
-    return { error: `Keys file note found: (${argv.keys})` }
-  }
-  try {
-    const validatedObject = {
-      clientId: null,
-      clientSecret: null,
-      redirectURI: null
-    }
-    const json = JSON.parse(await fsPromises.readFile(argv.keys))
-    console.log('- Keys file is valid json', typeof json)
-    const isObject = json && !Array.isArray(json) && typeof json === 'object'
-    if (!isObject) {
-      return { error: `Keys file json should be an object ({..}) (${argv.keys})` }
-    }
-    if (json.clientId || json.client_id) {
-      validatedObject.clientId = json.clientId || json.client_id
-      console.log('- Found clientId')
-    } else {
-      return { error: `Keys file: clientId not found (${argv.keys})` }
-    }
-    if (json.clientSecret || json.client_secret) {
-      console.log('- Found clientSecret')
-      validatedObject.clientSecret = json.clientSecret || json.client_secret
-    } else {
-      return { error: `Keys file: clientSecret not found (${argv.keys})` }
-    }
-    if (json.redirectURI) {
-      console.log('- Found redirectURI')
-      validatedObject.redirectURI = json.redirectURI
-    } else {
-      return { error: `Keys file: redirectURI not found (${argv.keys})` }
-    }
-    return validatedObject
-  } catch (err) {
-    return { error: `Could not parse keys file as json: ${argv.keys}` }
-  }
-  // unreachable
-}
 /**
  * Start by acquiring a pre-authenticated oAuth2 client.
  */

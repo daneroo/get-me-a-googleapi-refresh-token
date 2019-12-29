@@ -1,10 +1,10 @@
 # get-me-a-googleapi-refresh-token
 
-The purpose of this package is to encapsulating authentication to Google APIs with OAuth2.
+The purpose of this package is to encapsulate authentication to Google APIs with OAuth2.
 
 In particular we want to provision/verify refresh tokens *locally for a developer*, to test interacting with such a service.
 
-**This is meant to get local credententials, for local development (i.e. the OAuth callback is on <http://127.0.0.1>).*
+*This is meant to get local credententials, for local development (i.e. the OAuth callback is on <http://127.0.0.1>).*
 
 This library depends on the Google maintained [google-auth-library](https://github.com/googleapis/google-auth-library-nodejs#oauth2) package
 
@@ -20,6 +20,12 @@ The basics of Google's OAuth2 implementation is explained on [Google Authorizati
 - extract Auth/TokenManagement into npm
 - renovate
 - `google-auth-library` is included in `googleapis`, switch to that
+
+## Usage
+
+- setup
+- generate
+- validate
 
 ## Parts
 

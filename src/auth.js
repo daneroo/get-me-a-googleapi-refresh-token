@@ -4,15 +4,13 @@ const url = require('url')
 const open = require('open')
 const enableDestroy = require('server-destroy')
 
-// Download your OAuth2 configuration from the Google
-// const keys = require('../oauth2.keys.json')
+const { validateForLocalUse } = require('./setupCommand')
 
 module.exports = {
   usingRefreshToken,
   validateScope,
   makeRefreshTokenWithWebFlow,
   // - end of public API
-  validateForLocalUse,
   getTokensFromAuthorizationCode,
   getAuthorizationCode
 }
@@ -115,60 +113,6 @@ async function makeRefreshTokenWithWebFlow (keys, desiredScopes) {
   const { data: { name } } = await oAuth2Client.request({ url: 'https://www.googleapis.com/oauth2/v3/userinfo' })
 
   return { id, name, refreshToken, scopes }
-}
-
-// validate that the keys object is valid for a local (127.0.0.1) OAuth2 flow.
-// Has the shape:
-// {
-//   "web": {
-//     "client_id": "627240905859-l6v439arpiko8kbev2guqpibkjhg1ga0.apps.googleusercontent.com",
-//     "client_secret": "Frn3mgoAZp1oSx8Dc3IqmLdt",
-//     "redirect_uris": [
-//       "http://127.0.0.1:8080/auth/google/callback"
-//     ]
-//   }
-// }
-// Returns the expected path and port for first local rediect_uri
-// return {
-//   callbackPath:'/some/callback/path',
-//   localPort:8080
-// }
-//   or an error
-// return {
-//   error: "If there was an error"
-// }
-function validateForLocalUse (keys) {
-  if (!keys || !keys.web || !keys.web.client_id || !keys.web.client_secret ||
-     !keys.web.redirect_uris) {
-    return { error: 'Missing at least one required parameter : `{web:{client_id,client_secret,redirect_uris:[]}}`' }
-  }
-  if (!Array.isArray(keys.web.redirect_uris)) {
-    return { error: '`keys.web.redirect_uris` is not an Array' }
-  }
-  if (!keys.web.redirect_uris.length > 0) {
-    return { error: 'Missing `keys.web.redirect_uris[]` entries' }
-  }
-  const localUris = keys.web.redirect_uris.filter(u => u.startsWith('http://127.0.0.1'))
-  if (localUris.length < 1) {
-    return { error: '`keys.web.redirect_uris[]` should have at least 1 entry with `http://127.0.0.1` prefix' }
-  }
-  // Pick the first local redirect URI and return it along with the parsed path and port parts
-  try {
-    const redirectUri = localUris[0]
-    const u = new url.URL(redirectUri)
-    const callbackPath = u.pathname
-    const localPort = Number(u.port)
-    if (localPort === 0) {
-      throw new Error('http port should be explicit for local redirect URI')
-    }
-    return {
-      redirectUri,
-      callbackPath,
-      localPort
-    }
-  } catch (err) {
-    return { error: '`keys.web.redirect_uris[]` ' + `error:${err}` }
-  }
 }
 
 // Returns tokens for Code
