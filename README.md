@@ -10,6 +10,12 @@ This library depends on the Google maintained [google-auth-library](https://gith
 
 The basics of Google's OAuth2 implementation is explained on [Google Authorization and Authentication documentation](https://developers.google.com/identity/protocols/OpenIDConnect).
 
+## Publish
+
+```bash
+npm publish --access public
+```
+
 ## TODO
 
 - Rename public methods
