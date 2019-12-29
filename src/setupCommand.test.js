@@ -16,7 +16,7 @@ describe('Setup Validation options errors', () => {
     [{ ...ok, clientSecret: 42 }, { error: '`clientSecret` should be a string' }],
     [{ ...ok, redirectUri: 42 }, { error: '`redirectUri` should be a string' }],
     [{ ...ok, scopes: ['a', 42, 'c'] }, { error: '`scopes[]` should all be strings' }],
-    [{ ...ok, redirectURri 'https://somehost/path' }, { error: '`redirectUri` should start with http://127.0.0.1' }],
+    [{ ...ok, redirectUri: 'https://somehost/path' }, { error: '`redirectUri` should start with http://127.0.0.1' }],
     [{ ...ok, redirectUri: 'http://localhost/path' }, { error: '`redirectUri` should start with http://127.0.0.1' }],
     [{ ...ok, redirectUri: 'http://127.0.0.1:NotAPortNumberN/path' }, { error: '`redirectUri` error:TypeError [ERR_INVALID_URL]: Invalid URL: http://127.0.0.1:NotAPortNumberN/path' }],
     [{ ...ok, redirectUri: 'http://127.0.0.1/pathAfterNoPort' }, { error: '`redirectUri` error:Error: http port should be explicit for redirectUri' }],

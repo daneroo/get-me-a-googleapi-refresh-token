@@ -1,8 +1,8 @@
 {
-  "name": "gphotos-googleapis",
+  "name": "@daneroo/get-me-a-googleapi-refresh-token",
   "version": "1.0.0",
-  "description": "- Get a token and list all photos",
-  "main": "index.js",
+  "description": "- Get or validate a refresh token",
+  "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
     "test": "npm run lint && npm audit && npm run unit",
