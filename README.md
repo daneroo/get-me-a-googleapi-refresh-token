@@ -1,6 +1,6 @@
 # get-me-a-googleapi-refresh-token
 
-**2024-02-15**: the token in gitgnored `oauth2.keys.json` was deleted.
+**2024-02-15**: the token in gitgnored `oauth2.keys.json` was deleted. Itwas in the GPhotosSync Project (daniel.lauzon@gmail.com) Google API Console/API & Services/Credentials.
 
 The purpose of this package is to encapsulate authentication to Google APIs with OAuth2.
 
