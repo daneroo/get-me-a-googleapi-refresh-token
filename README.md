@@ -1,10 +1,12 @@
 # get-me-a-googleapi-refresh-token
 
+**2024-02-15**: the token in gitgnored `oauth2.keys.json` was deleted.
+
 The purpose of this package is to encapsulate authentication to Google APIs with OAuth2.
 
-In particular we want to provision/verify refresh tokens *locally for a developer*, to test interacting with such a service.
+In particular we want to provision/verify refresh tokens _locally for a developer_, to test interacting with such a service.
 
-*This is meant to get local credententials, for local development (i.e. the OAuth callback is on <http://127.0.0.1>).*
+_This is meant to get local credententials, for local development (i.e. the OAuth callback is on <http://127.0.0.1>)._
 
 This library depends on the Google maintained [google-auth-library](https://github.com/googleapis/google-auth-library-nodejs#oauth2) package
 

@@ -26,7 +26,7 @@ async function handler (argv) {
   if (!id || !name) {
     console.warn('You might want to add `https://www.googleapis.com/auth/userinfo.profile` to your requested scopes to get `id` and `name` fields associated with this token')
   }
-  console.debug({ id, name, refreshToken, scopes })
+  console.debug(JSON.stringify({ id, name, refreshToken, scopes }, null, 2))
 
   // const refreshTokenDBEntry = await makeRefreshTokenWithWebFlow(keys, scope)
   // console.info(`Refresh token acquired. (${refreshTokenDBEntry.id})`)
